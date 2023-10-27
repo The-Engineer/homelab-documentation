@@ -1,0 +1,26 @@
+---
+version: "2"
+
+services:
+  pyload:
+    image: lscr.io/linuxserver/pyload-ng:latest
+    container_name: pyload
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=000 # default: 022 - https://wintelguy.com/umask-calc.pl | optional? needed in unraid
+      - TZ=Europe/Berlin
+    volumes:
+      - ./pyload-config_ng:/config
+      - ./downloads:/downloads
+    ports:
+      - "8042:8000/tcp"
+      - "7227:7227/tcp" #optional
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:8000 || exit 1
+      interval: 60s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+    network_mode: bridge

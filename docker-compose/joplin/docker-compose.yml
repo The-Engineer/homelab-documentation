@@ -1,0 +1,44 @@
+---
+version: '3'
+
+services:
+  db:
+    image: postgres:15
+    container_name: joplin-db
+    volumes:
+      - ./joplindb:/var/lib/postgresql/data
+    #ports:
+    #  - "5432:5432"
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=joplin
+    network_mode: bridge
+
+  app:
+    image: joplin/server:latest
+    container_name: joplin-app
+    depends_on:
+      - db
+    #ports:
+    #  - "22300:22300"
+    restart: unless-stopped
+    environment:
+      - APP_PORT=22300
+      - APP_BASE_URL=http://joplin.felix.lan
+      - DB_CLIENT=pg
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DATABASE=joplin
+      - POSTGRES_USER=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=db
+      #- MAILER_ENABLED=1
+      #- MAILER_HOST=smtp.gmail.com
+      #- MAILER_PORT=465
+      #- MAILER_SECURE=1
+      #- MAILER_AUTH_USER=youremail@gmail.com
+      #- MAILER_AUTH_PASSWORD=Y0urP@ssw0rd
+      #- MAILER_NOREPLY_NAME=Joplin
+      #- MAILER_NOREPLY_EMAIL=email@email.com
+    network_mode: bridge

@@ -1,0 +1,19 @@
+version: "2"
+services:
+  app:
+    image: gotify/server:latest
+    container_name: gotify
+    user: "1000:1000"
+    ports:
+      - 8001:80
+    restart: always
+    environment:
+      - TZ='Europe/Berlin'
+      - GOTIFY_SERVER_KEEPALIVEPERIODSECONDS=0 # 0 = use Go default (15s); -1 = disable keepalive; set the interval in which keepalive packets will be sent.
+      # Only change this value if you know what you are doing.
+      - GOTIFY_DEFAULTUSER_NAME=<USERNAME>
+      - GOTIFY_DEFAULTUSER_PASS='<PASSWORD>'
+      - GOTIFY_REGISTRATION=false
+    volumes:
+      - ./data:/app/data
+    network_mode: bridge

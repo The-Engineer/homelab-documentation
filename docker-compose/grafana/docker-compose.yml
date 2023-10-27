@@ -1,0 +1,24 @@
+---
+version: "2.1"
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    user: "1000:1000"
+    #ports:
+    #  - 3000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
+    environment:
+      - TZ=Europe/Berlin
+      - GF_SECURITY_ADMIN_USER=<USERNAME>
+      - GF_SECURITY_ADMIN_PASSWORD=<PASSWORD>
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:3000/login || exit 1
+      interval: 20s
+      retries: 6
+      #start_period: 60s
+      timeout: 5s
+    network_mode: bridge

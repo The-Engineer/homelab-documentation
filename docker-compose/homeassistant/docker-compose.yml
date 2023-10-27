@@ -1,0 +1,35 @@
+---
+version: "2.1"
+services:
+  homeassistant:
+    image: lscr.io/linuxserver/homeassistant:latest
+    container_name: homeassistant
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - ./config:/config
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 8123:8123 #optional
+    #devices:
+    #  - /path/to/device:/path/to/device #optional
+    restart: unless-stopped
+    #networks:
+    #  direct_vlan:
+    #    ipv4_address: 192.168.178.207
+    #network_mode: bridge
+
+#networks:
+#  direct_vlan:
+#    driver: macvlan
+#    driver_opts:
+#      #parent: ens3
+#      parent: br0
+#    ipam:
+#      driver: default
+#      config:
+#        - subnet: 192.168.178.0/24
+#          gateway: 192.168.178.1

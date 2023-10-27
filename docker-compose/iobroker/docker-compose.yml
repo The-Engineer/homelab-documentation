@@ -1,0 +1,43 @@
+version: '2'
+
+services:
+  iobroker:
+    restart: always
+    image: buanet/iobroker:latest
+    container_name: iobroker
+    hostname: iobroker
+    network_mode: bridge
+    ports:
+      #- 1880:1880
+      - 1883:1883 # last used
+      #- 2001:2001
+      - 8081:8081 # last used
+      #- 8081:8081/udp
+      #- 8082:8082
+      #- 8083:8083
+      #- 8088:8088
+      #- 8091:8091
+      #- 8282:8282
+      #- 8284:8284
+      #
+      # https://forum.iobroker.net/topic/16491/iobroker-im-multihost-setup-im-docker-unter-ubuntu-18-04-lts
+      #- 1880:1880  #node-red
+      #- 1883:1883  #mqtt
+      #- 2001:2001  #homematic
+      #- 8081:8081  #iobroker admin
+      #- 8088:8088  #terminal - kollidiert mit influxdb!
+      #- 8123:8123  #homekit
+      #- 8282:8282  #flot
+      #- 8284:8284  #socketIO
+      #- 9000:9000   #Multihost
+      #- 9001:9001   #Multihost
+      #- 50005:50005 #Multihost
+    volumes:
+      - ./iobrokerdata:/opt/iobroker
+        #  - /dev/serial/by-id/:/dev/serial/by-id
+        #devices:
+        #  - /dev/ttyUSB0:/dev/ttyUSB0
+        #  - /dev/ttyACM0:/dev/ttyACM0
+
+# device is located in host VM via cmd:
+# ls -l /dev/serial/by-id

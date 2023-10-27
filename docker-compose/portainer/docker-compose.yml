@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    #image: portainer/portainer-ee:latest # free license available at portainer website
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    ports:
+      - 9009:9000
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/data
+    network_mode: bridge

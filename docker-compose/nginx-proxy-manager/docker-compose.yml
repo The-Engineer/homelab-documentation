@@ -1,0 +1,69 @@
+version: '2'
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: npm-app
+    ports:
+      - '80:80'
+      - '81:81' # DO NOT EXPOSE ADMIN INTERFACE TO INTERNET
+      - '443:443'
+    environment:
+      DB_MYSQL_HOST: "db"
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: "npm"
+      DB_MYSQL_PASSWORD: "npm"
+      DB_MYSQL_NAME: "npm"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    network_mode: bridge
+    healthcheck:
+      test: curl --fail http://localhost:81 || exit 1
+      interval: 20s
+      retries: 5
+      #start_period: 60s
+      timeout: 5s
+
+  db:
+    image: 'jc21/mariadb-aria:10.4.15-innodb'
+    container_name: npm-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: 'npm'
+      MYSQL_DATABASE: 'npm'
+      MYSQL_USER: 'npm'
+      MYSQL_PASSWORD: 'npm'
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    restart: always
+    network_mode: bridge
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -h localhost -u root -pnpm"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+
+  goaccess:
+    image: xavierh/goaccess-for-nginxproxymanager:latest
+    container_name: npm-goaccess
+    restart: always
+    environment:
+      - TZ=Europe/Berlin
+      #- SKIP_ARCHIVED_LOGS=False #optional
+      #- BASIC_AUTH=False #optional, default=False
+      #- BASIC_AUTH_USERNAME=user #optional
+      #- BASIC_AUTH_PASSWORD=password #optional
+    #ports:
+    #  - '7880:7880'
+    volumes:
+      - ./data/logs:/opt/log
+    network_mode: bridge
+    healthcheck:
+      test: curl --fail http://localhost:7880 || exit 1
+      interval: 20s
+      retries: 3
+      #start_period: 60s
+      timeout: 5s

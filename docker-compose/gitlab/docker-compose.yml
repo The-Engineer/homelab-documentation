@@ -1,0 +1,37 @@
+---
+version: '3.7'
+services:
+  web:
+    image: gitlab/gitlab-ce:latest
+    restart: unless-stopped
+    hostname: domain.tld
+    container_name: gitlab-ce
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        gitlab_rails['gitlab_shell_ssh_port'] = 8022
+    #    external_url 'https://domain.tld'
+    #ports:
+    #  - 8022:22
+    #  - '8080:80'
+    #  - '8443:443'
+    volumes:
+      - ./config:/etc/gitlab
+      - ./logs:/var/log/gitlab
+      - ./data:/var/opt/gitlab
+      - /etc/localtime:/etc/localtime:ro
+    network_mode: bridge
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    container_name: gitlab-runner
+    restart: unless-stopped
+    environment:
+      GODEBUG: "x509ignoreCN=0"
+      TZ: "Europe/Berlin"
+    depends_on:
+      - web
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./gitlab-runner:/etc/gitlab-runner
+      - /etc/localtime:/etc/localtime:ro
+    network_mode: bridge

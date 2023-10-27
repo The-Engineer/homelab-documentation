@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  obsidian:
+    image: ghcr.io/sytone/obsidian-remote:latest
+    container_name: obsidian-remote
+    hostname: obsidian-remote
+    #mem_limit: 2g
+    #cpu_shares: 768
+    security_opt:
+      - no-new-privileges:true
+    #healthcheck:
+    #  test: curl -f http://localhost:8080/ || exit 1
+    #ports:
+    #  - 8080:8080
+    #  - 27123:27123
+    #  - 27124:27124
+    volumes:
+      - ./vaults:/vaults
+      - ./config:/config
+    environment:
+      # PUID: 1000
+      # PGID: 1000
+      TZ: Europe/Berlin
+      DOCKER_MODS: linuxserver/mods:universal-git
+    #restart: on-failure:5
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:8080 || exit 1
+      interval: 20s
+      retries: 6
+      #start_period: 60s
+      timeout: 5s
+    network_mode: bridge

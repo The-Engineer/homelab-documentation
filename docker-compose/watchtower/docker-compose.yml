@@ -1,0 +1,35 @@
+version: "2"
+services:
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    hostname: docker-proxmox #optional
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/hostname:/etc/hostname:ro
+    environment:
+      # updating
+      WATCHTOWER_MONITOR_ONLY: 'false'
+      WATCHTOWER_CLEANUP: 'true'
+      # https://containrrr.dev/watchtower/notifications/
+      #WATCHTOWER_NOTIFICATIONS: email
+      #WATCHTOWER_NOTIFICATION_EMAIL_FROM: watchtower@mail.invalid
+      #WATCHTOWER_NOTIFICATION_EMAIL_TO: <RECIPIENT-MAIL>
+      #WATCHTOWER_NOTIFICATION_EMAIL_SERVER: <SMTP-SERVER>
+      #WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT: 587
+      #WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER: <SMTP-USER>
+      #WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD: <SMTP-PASSWORD>
+      WATCHTOWER_NOTIFICATIONS: "gotify"
+      WATCHTOWER_NOTIFICATION_GOTIFY_URL: "http://gotify"
+      WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN: "<GOTIFY-TOKEN>"
+      # scheduling
+      WATCHTOWER_POLL_INTERVAL: 21600 # same as --interval 21600 # every 6h
+      WATCHTOWER_RUN_ONCE: 'false' # same as --run-once
+      WATCHTOWER_HTTP_API_METRICS: true
+      WATCHTOWER_HTTP_API_TOKEN: '2vRsABVvcp9Yc986'
+      # command:
+      #--run-once
+      #--interval 21600
+    network_mode: bridge

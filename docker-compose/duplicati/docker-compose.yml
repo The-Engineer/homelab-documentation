@@ -1,0 +1,31 @@
+version: "2.1"
+services:
+  duplicati:
+    image: lscr.io/linuxserver/duplicati:latest
+    container_name: duplicati
+    hostname: proxmox-docker
+    environment:
+      - PUID=0 # root
+      - PGID=0 # root
+      - TZ=Europe/Berlin
+    # - CLI_ARGS= # optional
+    volumes:
+      # Config
+      - ./config:/config
+      - ./backups:/backups-local
+      - ./scripts:/scripts
+      # Data
+      - /path/to/docker/volume/mounts:/Container_docker-data
+      # Docker control
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+    ports:
+      - 8200:8200
+    restart: unless-stopped
+    network_mode: bridge
+    healthcheck:
+      test: curl --fail http://localhost:8200/ngax/index.html || exit 1
+      interval: 20s
+      retries: 5
+      #start_period: 10s
+      timeout: 5s

@@ -1,0 +1,38 @@
+---
+version: "2.1"
+services:
+  plex:
+    image: lscr.io/linuxserver/plex
+    container_name: plex-app
+    network_mode: bridge
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+      - PLEX_CLAIM=<CLAIM-TOKEN> # optional
+      - NVIDIA_VISIBLE_DEVICES=all     # optional when NVIDIA GPU is in use
+      - NVIDIA_DRIVER_CAPABILITIES=all # optional
+    #runtime: nvidia
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      #- /etc/timezone:/etc/timezone:ro # not available on qnap
+      #
+      - ./config:/config
+      - ./transcode:/transcode
+      - /path/to/Multimedia/files:/data
+    deploy: # optional if (Nvidia) GPU is in use
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    #ports:
+    #  - 32400:32400
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:32400/web/index.html || exit 1
+      interval: 60s
+      retries: 3
+      start_period: 60s
+      timeout: 5s
