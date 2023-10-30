@@ -1,0 +1,26 @@
+---
+version: "2.1"
+services:
+  syncthing:
+    image: lscr.io/linuxserver/syncthing:latest
+    container_name: syncthing
+    hostname: syncthing-docker-proxmox #optional
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Europe/Berlin
+    volumes:
+      - ./config:/config
+      - /path/to/data:/data
+    ports:
+      - 8384:8384
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+    restart: always
+    healthcheck:
+      test: nc -z localhost 8384 || exit 1
+      interval: 10s
+      retries: 6
+      timeout: 5s
+    network_mode: bridge

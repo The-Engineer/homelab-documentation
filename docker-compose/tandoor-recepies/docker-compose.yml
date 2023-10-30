@@ -1,0 +1,36 @@
+---
+version: "2"
+services:
+  db_recipes:
+    image: postgres:15
+    container_name: recipes_postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    network_mode: bridge
+
+  recipes:
+    image: vabene1111/recipes:latest
+    container_name: recipes_app
+    user: "1000:1000"
+    #ports:
+    #  - 8080:8080
+    volumes:
+      - ./staticfiles:/opt/recipes/staticfiles
+      - ./mediafiles:/opt/recipes/mediafiles
+    environment:
+      - SECRET_KEY=YOUR_SECRET_KEY
+      - DB_ENGINE=django.db.backends.postgresql
+      - POSTGRES_HOST=db_recipes
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    restart: unless-stopped
+    depends_on:
+      - db_recipes
+    network_mode: bridge

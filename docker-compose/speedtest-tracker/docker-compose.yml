@@ -1,0 +1,48 @@
+version: '3.3'
+services:
+  speedtest-tracker:
+    container_name: speedtest-tracker
+    #ports:
+    #  - '8080:80'
+    #  - '8443:443'
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - DB_CONNECTION=mysql
+      - DB_HOST=speedtest-tracker-db
+      - DB_PORT=3306
+      - DB_DATABASE=speedtest_tracker
+      - DB_USERNAME=speedy
+      - DB_PASSWORD=password
+    volumes:
+      - ./config:/config
+      - ./etc-ssl-web/web:/etc/ssl/web
+    image: ghcr.io/alexjustesen/speedtest-tracker:latest
+    restart: unless-stopped
+    depends_on:
+      speedtest-tracker-db:
+        condition: service_healthy
+    network_mode: bridge
+    healthcheck:
+      test: curl --fail http://localhost:80 || exit 1
+      interval: 20s
+      retries: 6
+      timeout: 5s
+
+  speedtest-tracker-db:
+    image: mariadb:10
+    container_name: speedtest-tracker-db
+    restart: unless-stopped
+    environment:
+      - MARIADB_DATABASE=speedtest_tracker
+      - MARIADB_USER=speedy
+      - MARIADB_PASSWORD=password
+      - MARIADB_RANDOM_ROOT_PASSWORD=true
+    volumes:
+      - ./speedtest-db:/var/lib/mysql
+    network_mode: bridge
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -h localhost -u $$MARIADB_USER -p$$MARIADB_PASSWORD" ]
+      interval: 20s
+      timeout: 5s
+      retries: 10

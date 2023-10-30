@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  iobroker:
+    restart: always
+    image: ghcr.io/tasmoadmin/tasmoadmin:latest
+    container_name: tasmoadmin
+    hostname: tasmoadmin
+    #environment:
+    #  - TASMO_DATADIR=/data/tasmoadmin/config/
+    #  - TASMO_BASEURL=http://tasmoadmin.example.lan/
+    #ports:
+    #  - 80:80
+    volumes:
+      - ./data:/data
+    network_mode: bridge

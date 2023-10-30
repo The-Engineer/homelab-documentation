@@ -1,0 +1,15 @@
+version: '2'
+services:
+  tautulli:
+    image: tautulli/tautulli:latest
+    container_name: tautulli
+    restart: unless-stopped
+    volumes:
+      - ./config:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    #ports:
+    #  - 8181:8181
+    network_mode: bridge

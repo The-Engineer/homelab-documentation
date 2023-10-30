@@ -6,8 +6,13 @@ This is an attempt to document my homelab setup and share ideas and problems I c
 
 In this folder I share all the compose files I use or used in docker to run all the services one could wish for :)
 
-Important: you will find `network_mode: bridge` in almost all compose files and ports to expose commented out. I use this setting to put all containers into the same docker network. This allows me to use dockers DNS for reverse proxy access via local domains and not via many IPs and weird ports.
-Just the nginx proxy manager needs to have its ports exposed and forward to the container names with their default ports..
+**Important:**
+
+You will find `network_mode: bridge` in almost all compose files and ports to expose commented out. I use this setting to put all containers into the same docker network. This allows me to use dockers DNS for reverse proxy access via local domains and not via many IPs and weird ports.
+Just the nginx proxy manager needs to have its ports exposed and forward to the container names with their default ports.
+
+Further the compose files all use relative local paths to save the app data which works well when they are run directly via docker cli and not Portainer.
+When used with Portainer its best to use absolute paths inside your /home/USERNAME or /opt/docker and create subfolders for every application.
 
 ### basic setup
 
