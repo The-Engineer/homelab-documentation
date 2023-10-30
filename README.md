@@ -6,7 +6,8 @@ This is an attempt to document my homelab setup and share ideas and problems I c
 
 In this folder I share all the compose files I use or used in docker to run all the services one could wish for :)
 
-This is a big work in progress as usual.
+Important: you will find `network_mode: bridge` in almost all compose files and ports to expose commented out. I use this setting to put all containers into the same docker network. This allows me to use dockers DNS for reverse proxy access via local domains and not via many IPs and weird ports.
+Just the nginx proxy manager needs to have its ports exposed and forward to the container names with their default ports..
 
 ### basic setup
 
@@ -31,6 +32,10 @@ Autoheal takes care of dead containers. When there are health checks presend in 
 Hacky solution but to save energy I use a QNAP TS-473 where I removed the firmware storage module from the mainboard to be able tu USB boot. 
 This allowed me to install Unraid with SSD caching and the HDDs holding the data. Most of the day all HDDs are spun down and just the SSDs are used to save a lot of energy and just write the data of the day to the HDDs at night.  
 Still I can't get it below 40W power consumption.
+
+#### NAS HDDs
+
+For NAS HDDs I use WD RED drives which are a little bit slower than Seagate Ironwolf but have less power consumption (5400rpm vs 7200rpm). Buing them directly is fine but I mostly chose to buy WD Elements external HDDs on Amazon and break them open. In all bigger models are white label WD Red drives build in with SATA connectors. 
 
 ### Thin client - Lenovo M910Q
 
