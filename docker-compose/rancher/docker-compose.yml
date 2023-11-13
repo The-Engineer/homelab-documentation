@@ -1,0 +1,20 @@
+# create and run this container
+# it will be available via https://<ip> and its 443 port
+# the setup will ask for an initial password, it can be obtained with the following command
+# > docker logs rancher 2>&1 | grep "Bootstrap Password:"
+# after that a password for the user "admin" can be set
+# the current rancher version already sets up a local single node k8s cluster
+---
+services:
+  rancher:
+    image: rancher/rancher
+    container_name: rancher
+    volumes:
+      - ./var-lib-rancher:/var/lib/rancher
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    privileged: true
+    command: --no-cacerts # no cert creation
+    network_mode: bridge
