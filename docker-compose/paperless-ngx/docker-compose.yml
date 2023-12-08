@@ -1,0 +1,118 @@
+---
+version: "3.4"
+services:
+  broker:
+    image: redis:7
+    container_name: paperless-broker
+    restart: unless-stopped
+    volumes:
+      - ./redis-data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      retries: 6
+      #start_period: 60s
+      timeout: 5s
+
+  db:
+    image: postgres:13
+    container_name: paperless-db
+    restart: unless-stopped
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paperless"]
+      interval: 10s
+      retries: 6
+      #start_period: 60s
+      timeout: 5s
+
+  webserver:
+    #image: jonaswinkler/paperless-ng:latest
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: paperless-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+    #depends_on:
+    #  - db
+    #  - broker
+    #  #- gotenberg
+    #  #- tika
+    ports:
+      - "8010:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./data:/usr/src/paperless/data
+      - ./media:/usr/src/paperless/media
+      - ./export:/usr/src/paperless/export
+      - ./consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      # The UID and GID of the user used to run paperless in the container. Set this
+      # to your UID and GID on the host so that you have write access to the
+      # consumption directory.
+      USERMAP_UID: 1000
+      USERMAP_GID: 1000
+      PAPERLESS_OCR_LANGUAGES: eng deu
+      # Adjust this key if you plan to make paperless available publicly. It should
+      # be a very long sequence of random characters. You don't need to remember it.
+      #PAPERLESS_SECRET_KEY: change-me
+      PAPERLESS_TIME_ZONE: Europe/Berlin
+      PAPERLESS_OCR_LANGUAGE: deu
+      PAPERLESS_CONSUMPTION_DIR: /usr/src/paperless/consume
+      # https://paperless-ng.readthedocs.io/en/latest/configuration.html#configuration-polling
+      PAPERLESS_CONSUMER_POLLING: 10
+      # PAPERLESS_ADMIN_USER: felix
+      # PAPERLESS_ADMIN_PASSWORD: xxx
+      #
+      # for enabling tika for office document conversion must add tike and gotenberg services below
+      # PAPERLESS_TIKA_ENABLED: 1
+      # PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
+      # PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+      PAPERLESS_FILENAME_FORMAT: "{created_year}/{created_year}-{created_month}-{created_day} - {correspondent} - {title}"
+
+  brother-scanner:
+    image: ghcr.io/philippmundhenk/brotherscannerdocker
+    container_name: paperless-brother-scanner
+    volumes:
+      #- ./scans:/scans
+      - ./consume:/scans # paperless consume folder
+    environment:
+      - NAME=DCP-L2520DW
+      - MODEL=DCP-L2520DW
+      - IPADDRESS=10.23.91.54
+      #- OCR_SERVER=localhost # optional, for OCR
+      #- OCR_PORT=32800 # optional, for OCR
+      #- OCR_PATH=ocr.php # optional, for OCR
+      - UID=1000 # optional, for /scans permissions
+      - GID=1000 # optional, for /scans permissions
+      - TZ=Europe/Berlin # optional, for correct time in scanned filenames
+      #- USERNAME=felix
+      - RESOLUTION=300 # 100,200,300,400,600
+    restart: unless-stopped
+    network_mode: "host" # EXPOSED PORTS: 54925 + 54921
+
+  #  gotenberg:
+  #    image: thecodingmachine/gotenberg
+  #    container_name: paperless-gotenberg
+  #    restart: unless-stopped
+  #    environment:
+  #      DISABLE_GOOGLE_CHROME: 1
+  #
+  #  tika:
+  #    image: apache/tika
+  #    container_name: paperless-tika
+  #    restart: unless-stopped
