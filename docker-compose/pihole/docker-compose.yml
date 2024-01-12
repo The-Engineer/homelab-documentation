@@ -1,0 +1,34 @@
+---
+version: "3"
+
+# https://github.com/pi-hole/docker-pi-hole/blob/master/README.md
+#
+# Keep in mind to free up port 53 on ubuntu before deploying
+# https://www.linuxuprising.com/2020/07/ubuntu-how-to-free-up-port-53-used-by.html
+#
+# if changes in the UI run into error 'attempt to write to a readonly database'
+# run the following command to fix it:
+# docker exec pihole chown -R www-data:pihole /etc/pihole
+
+services:
+  pihole:
+    container_name: pihole
+    hostname: pihole-primary
+    image: pihole/pihole:latest
+    # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "80:80/tcp"
+    environment:
+      TZ: 'Europe/Berlin'
+      WEBPASSWORD: '' # disable password for webui
+    volumes:
+      - ./etc-pihole:/etc/pihole
+      - ./etc-dnsmasq.d:/etc/dnsmasq.d
+      - ./logs:/var/log/pihole
+    # https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    cap_add:
+      - NET_ADMIN
+    restart: always # Recommended but not required (DHCP needs NET_ADMIN)
