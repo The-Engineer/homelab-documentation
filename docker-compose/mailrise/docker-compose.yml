@@ -1,0 +1,15 @@
+# https://github.com/YoRyan/mailrise
+---
+version: "2.1"
+services:
+  mailrise:
+    image: yoryan/mailrise
+    container_name: mailrise
+    volumes:
+      - ./mailrise.conf:/etc/mailrise.conf:ro
+    ports:
+      - 8025:8025
+    restart: always
+
+# send mail to gotify@mailrise or gotify@mailrise.xyz
+# without AUTH and smtp server MAILRISE_IP:8025
