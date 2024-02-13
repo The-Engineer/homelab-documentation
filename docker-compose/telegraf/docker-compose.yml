@@ -1,0 +1,11 @@
+---
+version: '3.6'
+services:
+  telegraf:
+    image: telegraf:1.27-alpine
+    container_name: telegraf
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    #ports:
+    #- '8125:8125/udp' # just needed for some socket endpoints
+    restart: always
