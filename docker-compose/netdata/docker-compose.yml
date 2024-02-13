@@ -1,0 +1,28 @@
+services:
+  netdata:
+    image: netdata/netdata
+    ports:
+      - 19999:19999
+    restart: unless-stopped
+    container_name: netdata
+    # hostname: vs.laub-home.de # set to fqdn of host
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ./data_netdata:/etc/netdata
+      - ./data_netdata_lib:/var/lib/netdata
+      - ./data_netdata_cache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=Europe/Berlin
+      - DOCKER_USR=root
+      # If running on a virtual Machin you can get it with:
+      # # systemd-detect-virt -v
+      #- VIRTUALIZATION=xen
