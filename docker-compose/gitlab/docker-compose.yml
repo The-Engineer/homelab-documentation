@@ -8,12 +8,23 @@ services:
     container_name: gitlab-ce
     environment:
       GITLAB_OMNIBUS_CONFIG: |
+        gitlab_rails['trusted_proxies'] = ['REVERSE_PROXY_IP']
         gitlab_rails['gitlab_shell_ssh_port'] = 8022
+        nginx['listen_https'] = false
+        nginx['redirect_http_to_https'] = false
+        letsencrypt['enable'] = false
+        #
+        puma['worker_processes'] = 0 # disable cluster mode to avoid more memory usage
+        sidekiq['max_concurrency'] = 2
+        #
+        grafana['enable'] = false
+        prometheus_monitoring['enable'] = false
+        alertmanager['enable'] = false
     #    external_url 'https://domain.tld'
-    #ports:
-    #  - 8022:22
-    #  - '8080:80'
-    #  - '8443:443'
+    ports:
+      - '8022:22' # custom git ssh port
+      - '8080:80'
+      - '8443:443'
     volumes:
       - ./config:/etc/gitlab
       - ./logs:/var/log/gitlab
