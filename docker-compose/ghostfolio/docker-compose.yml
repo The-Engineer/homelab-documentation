@@ -1,0 +1,50 @@
+version: '3.9'
+services:
+  ghostfolio:
+    image: ghostfolio/ghostfolio:latest
+    container_name: ghostfolio-app
+    init: true
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?connect_timeout=300&sslmode=prefer
+      NODE_ENV: production
+      ACCESS_TOKEN_SALT: S2F7mQdgv95LiSTwZYz9VPdTF
+      JWT_SECRET_KEY: SubFcZFAcqy3pJiTz0runldmp
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - "3333:3333"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:3333/api/v1/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:15
+    container_name: ghostfolio-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: ghostfolio-redis
+    command: ['redis-server', '--requirepass', $REDIS_PASSWORD]
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli --pass $REDIS_PASSWORD ping | grep PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 5
