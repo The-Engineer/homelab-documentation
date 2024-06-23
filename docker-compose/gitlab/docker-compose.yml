@@ -15,9 +15,10 @@ services:
         letsencrypt['enable'] = false
         #
         puma['worker_processes'] = 0 # disable cluster mode to avoid more memory usage
-        sidekiq['max_concurrency'] = 2
+        # sidekiq['max_concurrency'] = 2 # up until gitlab 16.9
+        sidekiq['concurrency'] = 2 # after gitlab 17
         #
-        grafana['enable'] = false
+        # grafana['enable'] = false # breaks >= gitlab 17.1
         prometheus_monitoring['enable'] = false
         alertmanager['enable'] = false
     #    external_url 'https://domain.tld'
