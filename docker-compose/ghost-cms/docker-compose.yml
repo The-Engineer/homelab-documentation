@@ -1,0 +1,47 @@
+version: '3.1'
+services:
+
+  ghost:
+    image: ghost:5-alpine
+    container_name: ghost-cms
+    restart: unless-stopped
+    ports:
+      - "8080:2368"
+    environment:
+      # see https://ghost.org/docs/config/#configuration-options
+      database__client: mysql
+      database__connection__host: ghost-db
+      database__connection__user: ghost
+      database__connection__password: ghostdbpass
+      database__connection__database: ghostdb
+      # this url value is just an example, and is likely wrong for your environment!
+      url: http://localhost:2368
+      # contrary to the default mentioned in the linked documentation, this image defaults to NODE_ENV=production (so development mode needs to be explicitly specified if desired)
+      #NODE_ENV: development
+    depends_on:
+      ghost-db:
+        condition: service_healthy
+    volumes:
+      - ./ghost-content:/var/lib/ghost/content
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:2368 || exit 1
+      interval: 5s
+      retries: 20
+      timeout: 10s
+
+  ghost-db:
+    image: mariadb:11
+    container_name: ghost-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: MyStrongPassword1337!
+      MARIADB_USER: ghost
+      MARIADB_PASSWORD: ghostdbpass
+      MARIADB_DATABASE: ghostdb
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
