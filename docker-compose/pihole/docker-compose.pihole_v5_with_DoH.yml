@@ -1,5 +1,4 @@
 ---
-version: "3"
 
 # https://github.com/pi-hole/docker-pi-hole/blob/master/README.md
 #
@@ -13,22 +12,34 @@ version: "3"
 services:
   pihole:
     container_name: pihole
-    hostname: pihole-primary
-    image: pihole/pihole:latest
+    hostname: pihole
+    image: pihole/pihole:2024.07.0 # v5
     # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "67:67/udp"
+      # - "67:67/udp" # just needed for DHCP
       - "80:80/tcp"
     environment:
       TZ: 'Europe/Berlin'
-      WEBPASSWORD: '' # disable password for webui
+      WEBPASSWORD: ''
+      # DoH
+      DNS1: "cloudflared#5053"
+      DNS2: "cloudflared#5053"
     volumes:
       - ./etc-pihole:/etc/pihole
       - ./etc-dnsmasq.d:/etc/dnsmasq.d
       - ./logs:/var/log/pihole
-    # https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
-    cap_add:
-      - NET_ADMIN
-    restart: always # Recommended but not required (DHCP needs NET_ADMIN)
+    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    # cap_add:
+    #   - NET_ADMIN # just needed for DHCP
+    depends_on:
+      - cloudflared
+    restart: always
+
+# This container enables DoH (DNS ober HTTPS) to allow for more privacy
+  cloudflared:
+    container_name: cloudflared
+    image: cloudflare/cloudflared:latest
+    command: proxy-dns --port 5053 --upstream https://cloudflare-dns.com/dns-query --address 0.0.0.0
+    restart: always
