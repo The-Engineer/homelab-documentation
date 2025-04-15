@@ -1,0 +1,40 @@
+---
+ 
+# https://github.com/pi-hole/docker-pi-hole/blob/master/README.md
+# https://www.linuxuprising.com/2020/07/ubuntu-how-to-free-up-port-53-used-by.html
+# https://docs.pi-hole.net/guides/dns/cloudflared/
+# https://developers.cloudflare.com/1.1.1.1/infrastructure/network-operators/#available-endpoints
+ 
+services:
+  pihole:
+    container_name: pihole-v6
+    hostname: pihole-v6
+    image: pihole/pihole:latest
+    # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      # - "67:67/udp" # just needed for DHCP
+      - "80:80/tcp"
+      # - "443:443/tcp"
+    environment:
+      TZ: 'Europe/Berlin'
+      FTLCONF_webserver_api_password: 'passwort123'
+      # DoH
+      FTLCONF_dns_upstreams: "cloudflared#5053"
+    volumes:
+      - ./etc-pihole:/etc/pihole
+      - ./etc-dnsmasq.d:/etc/dnsmasq.d
+      - ./logs:/var/log/pihole
+    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    # cap_add:
+    #   - NET_ADMIN # just needed for DHCP
+    depends_on:
+      - cloudflared
+    restart: always
+ 
+  cloudflared:
+    container_name: cloudflared-p6
+    image: cloudflare/cloudflared:latest
+    command: proxy-dns --port 5053 --upstream https://cloudflare-dns.com/dns-query --address 0.0.0.0
+    restart: always
