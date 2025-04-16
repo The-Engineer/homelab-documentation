@@ -8,6 +8,7 @@ services:
       - PUID=0 # root
       - PGID=0 # root
       - TZ=Europe/Berlin
+      - DUPLICATI__WEBSERVICE_PASSWORD=passwort123 # FIXME: PLS CHANGE - without password the UI is not accessible
     # - CLI_ARGS= # optional
     volumes:
       # Config
