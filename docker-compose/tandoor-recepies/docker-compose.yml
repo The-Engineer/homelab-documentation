@@ -13,7 +13,7 @@ services:
     network_mode: bridge
 
   recipes:
-    image: vabene1111/recipes:latest
+    image: ghcr.io/tandoorrecipes/recipes:latest
     container_name: recipes_app
     #ports:
     #  - 8080:8080
