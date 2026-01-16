@@ -1,12 +1,13 @@
 services:
   it-tools:
-    image: corentinth/it-tools:latest
+    # image: corentinth/it-tools:latest # original project is abandoned, switching to fork
+    image: ghcr.io/sharevb/it-tools:stable # active fork
     container_name: it-tools
     ports:
-      - "8080:80"
+      - "8080:8080" # original ran on 80
     restart: unless-stopped
     healthcheck:
-      test: curl --fail http://localhost:80 || exit 1
+      test: curl --fail http://localhost:8080 || exit 1
       interval: 10s
       retries: 6
       #start_period: 10s
