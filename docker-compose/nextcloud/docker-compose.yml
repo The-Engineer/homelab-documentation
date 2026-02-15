@@ -1,0 +1,86 @@
+---
+
+# I am using this deployment on port 80 in combination with my central reverse proxy which takes care of the local domain and ssl.
+# As this is used by a single user I an not using redis
+
+services:
+  nextcloud-app:
+    image: nextcloud
+    container_name: nextcloud-app
+    user: "1000:1000"
+    environment:
+      TZ: ${TZ}
+      #
+      MYSQL_HOST: nextcloud-db
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+      #
+      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD}
+      NEXTCLOUD_TRUSTED_DOMAINS: ${NEXTCLOUD_TRUSTED_DOMAINS}
+      TRUSTED_PROXIES: REVERSE_PROXY_IP
+      OVERWRITEPROTOCOL: https
+    volumes:
+      - ./nc-data:/var/www/html
+    ports:
+#     - 443:443
+      - 9980:80
+    depends_on:
+      nextcloud-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/status.php"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
+
+  nextcloud-db:
+    image: lscr.io/linuxserver/mariadb:11
+    container_name: nextcloud-db
+    restart: unless-stopped
+    environment:
+      PUID: ${PUID}
+      PGID: ${GUID}
+      TZ: ${TZ}
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./nc-db-config:/config
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+####### OPTIONAL: NEXTCLOUD OFFICE #######
+
+# if you want to use the online office features of Nextcloud you will need an Collabora server.
+# The following service creates the server and needs to be made available with its own (https) domain. 
+# Just the http DNS name did not work for me.
+
+# After deploying the container go into your NC deployment and install a new app called "Nextcloud Office"
+# After installation and activation go to the admin Office settings under DOMAIN/settings/admin/richdocuments
+# There you enter the collabora URL under own server.
+  
+  collabora:
+    image: collabora/code
+    container_name: nextcloud-collabora
+    restart: always
+    cap_add:
+      - MKNOD
+    environment:
+      - TZ=Europe/Berlin
+      # Domain of your Nextcloud, Regex Escaped
+      - domain=nextcloud\\.example\\.tld
+      # SSL termination handled by external reveser proxy
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=true
+      # my languages
+      - dictionaries=de_DE en_GB en_US
+    ports:
+      - "9980:9980"
