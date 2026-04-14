@@ -1,5 +1,4 @@
 ---
-
 services:
   monitoring:
     image: checkmk/check-mk-raw:2.4.0-latest

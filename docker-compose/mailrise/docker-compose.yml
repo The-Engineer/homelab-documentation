@@ -1,6 +1,5 @@
 # https://github.com/YoRyan/mailrise
 ---
-version: "2.1"
 services:
   mailrise:
     image: yoryan/mailrise

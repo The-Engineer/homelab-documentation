@@ -1,7 +1,6 @@
-version: "2"
 services:
   watchtower:
-    image: containrrr/watchtower
+    image: nickfedor/watchtower # containrrr/watchtower ; original project is not supported anymore
     container_name: watchtower
     hostname: docker-proxmox #optional
     restart: always

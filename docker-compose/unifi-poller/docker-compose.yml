@@ -1,4 +1,3 @@
-version: '3'
 services:
   unifi-poller:
     image: ghcr.io/unpoller/unpoller:latest

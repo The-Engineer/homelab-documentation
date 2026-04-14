@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   obsidian:
     image: ghcr.io/sytone/obsidian-remote:latest

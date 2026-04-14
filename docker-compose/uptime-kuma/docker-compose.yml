@@ -1,5 +1,4 @@
 ---
-version: "2"
 services:
   app:
     container_name: uptime-kuma

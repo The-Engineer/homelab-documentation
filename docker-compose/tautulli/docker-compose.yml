@@ -1,4 +1,3 @@
-version: '2'
 services:
   tautulli:
     image: tautulli/tautulli:latest

@@ -1,5 +1,4 @@
 ---
-version: '3.7'
 services:
   web:
     image: gitlab/gitlab-ce:latest

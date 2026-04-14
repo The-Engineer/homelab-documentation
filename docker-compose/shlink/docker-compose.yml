@@ -1,5 +1,4 @@
-version: "3"
-
+---
 services:
   shlink-app:
     image: shlinkio/shlink:stable
