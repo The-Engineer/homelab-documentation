@@ -35,6 +35,6 @@ services:
  
   cloudflared:
     container_name: cloudflared-p6
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2026.1.2@sha256:e9bcb2ef08d25632ff74344e73a025f4f4bf12718335b196fa0e670cacace8c5 # MUST stay at 2026.1.2 because DNS support was dropped in later versions
     command: proxy-dns --port 5053 --upstream https://cloudflare-dns.com/dns-query --address 0.0.0.0
     restart: always
